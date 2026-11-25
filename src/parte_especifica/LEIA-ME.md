@@ -1,6 +1,6 @@
 # Parte Específica · Bank Marketing
 
-Painel para gestores de campanhas. A pergunta aprovada pela equipe está na tela inicial. Usamos o arquivo original bank-full.csv, com delimitador ponto e vírgula, e o dicionário original bank-names.txt em data/parte_especifica/. Fonte: Moro, S., Rita, P. e Cortez, P. (2014), Bank Marketing, UCI Machine Learning Repository, https://doi.org/10.24432/C5K306 (CC BY 4.0).
+Painel para gestores de campanhas. Segundo confirmação da equipe, a professora aprovou o dataset Bank Marketing submetido no checkpoint. A pergunta de pesquisa está na tela inicial. Usamos o arquivo original bank-full.csv, com delimitador ponto e vírgula, e o dicionário original bank-names.txt em data/parte_especifica/. Fonte: Moro, S., Rita, P. e Cortez, P. (2014), Bank Marketing, UCI Machine Learning Repository, https://doi.org/10.24432/C5K306 (CC BY 4.0).
 
 Na raiz do repositório, usando um ambiente virtual com Python 3.11 ou superior:
 
