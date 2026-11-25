@@ -1,0 +1,26 @@
+.stMainBlockContainer {max-width: 64rem; padding-top: 3rem; padding-bottom: 4rem;}
+[data-testid="stAppViewContainer"] {font-variant-numeric: tabular-nums;}
+[data-testid="stRadio"] [role="radiogroup"] {gap: .6rem 1.65rem; border-block: 1px solid #bdc9bf; padding-block: .8rem;}
+h1 {font-family: Georgia, serif !important; font-weight: 500 !important; letter-spacing: -.035em; line-height: 1.08 !important; text-wrap: balance;}
+h2, h3 {letter-spacing: -.025em;}
+.pesquisa {max-width: 47rem; font-size: 1.12rem; line-height: 1.55; margin: 0 0 1rem; color:#31463b;}
+.escopo {font-size: .98rem; color:#42584c; margin: .25rem 0;}
+.resultados {width:100%; overflow-x:auto;}
+.resultados table {width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums;}
+.resultados th,.resultados td {border:0; border-bottom:1px solid #cbd3cc; padding:.85rem .65rem; text-align:right;}
+.resultados thead th {background:#e9eee8; font-size:.88rem; color:#354a3e;}
+.resultados th:first-child {text-align:left;}
+.resultados tbody th {font-weight:500;}
+.resultados tbody td:last-child {font-weight:700; color:#18593f;}
+.resultados tbody tr:hover {background:#eff3ed;}
+::selection {background:#ccdfd1; color:#122b20;}
+@media(max-width:640px) {
+  .stMainBlockContainer {padding:3.5rem 1rem 2rem;}
+  .resultados th,.resultados td {padding:.75rem .32rem; font-size:.86rem;}
+  .resultados thead th {font-size:.78rem;}
+  [data-testid="stRadio"] [role="radiogroup"] {gap:.4rem .7rem;}
+}
+.resultados tbody td:first-child {text-align:left;}
+@media(max-width:640px) {
+  h1 {font-size:2.15rem !important;}
+}
