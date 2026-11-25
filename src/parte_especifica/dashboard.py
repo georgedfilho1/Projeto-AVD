@@ -1,11 +1,12 @@
 # [IA] Codex – apoio com pandas, controles Streamlit e renderização das escolhas do grupo.
+import base64
 import json
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import streamlit as st
 
-from eda import carregar_dados, tabelas
+from eda import carregar_dados, resumir_adesao, tabelas
 
 
 PASTA = Path(__file__).resolve().parent
@@ -16,10 +17,41 @@ PERGUNTA = (
 )
 
 
+CAMPOS = {
+    "age": "Idade", "job": "Ocupação", "marital": "Estado civil",
+    "education": "Escolaridade", "default": "Crédito em inadimplência",
+    "balance": "Saldo médio anual (€)", "housing": "Financiamento habitacional",
+    "loan": "Empréstimo pessoal", "contact": "Canal de contato", "day": "Dia do mês",
+    "month": "Mês do contato", "duration": "Duração do contato (s)",
+    "campaign": "Contatos na campanha atual", "pdays": "Dias desde contato anterior",
+    "previous": "Contatos em campanhas anteriores", "poutcome": "Resultado anterior",
+    "y": "Adesão ao depósito",
+}
+
+
+def nome_campo(campo):
+    return f"{CAMPOS.get(campo, campo)} · {campo}"
+
+
 @st.cache_data
 def carregar():
     base = carregar_dados()
     return base, tabelas(base)
+
+
+def inteiro(valor):
+    return f"{valor:,}".replace(",", ".")
+
+
+def percentual(valor):
+    return f"{valor:.2f}%".replace(".", ",")
+
+
+@st.cache_data
+def estilo(css, fonte, gravura):
+    return css.replace("FONTE_LOCAL", base64.b64encode(fonte).decode()).replace(
+        "GRAVURA_LOCAL", base64.b64encode(gravura).decode()
+    )
 
 
 def desenhar(painel, dados):
@@ -36,9 +68,12 @@ def desenhar(painel, dados):
         ax.bar(serie.index.astype(str), serie, label=medida, color="#266657")
     else:
         ax.plot(serie.index.astype(str), serie, marker="o", label=medida, color="#266657")
-    ax.set(xlabel=x, ylabel=medida, title=painel["titulo"])
+    ax.set(xlabel=nome_campo(x), ylabel=medida, title=painel["titulo"])
     ax.tick_params(axis="x", labelrotation=40)
-    ax.legend()
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.grid(axis="y", alpha=.17)
+    ax.set_axisbelow(True)
+    ax.legend(frameon=False)
     st.pyplot(fig)
     plt.close(fig)
     st.write(painel["nota"])
@@ -47,33 +82,68 @@ def desenhar(painel, dados):
 
 
 st.set_page_config(page_title="Bank Marketing", layout="wide")
-st.html(f"<style>{(PASTA / 'painel.css').read_text()}</style>")
-st.title("Campanhas de marketing bancário")
-st.caption("Bank Marketing · UCI   /   Painel para gestores de campanhas")
+css = estilo((PASTA / "painel.css").read_text(),
+             (PASTA / "assets/InstrumentSerif-latin.ttf").read_bytes(),
+             (PASTA / "assets/gravura.png").read_bytes())
+st.html(f"<style>{css}</style>")
 dados, resultados = carregar()
-pagina = st.radio("Navegação", ["Histórico de campanhas", "Exploração", "Visualizações"],
-                  horizontal=True, label_visibility="collapsed")
-
+st.html('<header class="mast"><div class="ident"><span aria-hidden="true" class="selo">B</span>'
+        '<span>Bank Marketing</span></div><span class="fonte">UCI · Análise e Visualização de Dados</span></header>')
+rotulos = {"Histórico de campanhas": "Visão geral", "Exploração": "Explorar dados", "Visualizações": "Visualizações"}
+pagina = st.radio("Navegação", list(rotulos), format_func=rotulos.get, horizontal=True,
+                  label_visibility="collapsed", key="menu")
 if pagina == "Histórico de campanhas":
-    resumo = resultados["adesao_por_historico"]
-    st.subheader("Adesão por resultado anterior")
-    st.html(f'<p class="pesquisa">{PERGUNTA}</p>')
-    total = f"{len(dados):,}".replace(",", ".")
-    recorte = f"{resumo.Registros.sum():,}".replace(",", ".")
-    st.html(f'<p class="escopo"><strong>{recorte}</strong> registros com contato anterior '
-            f' em um total de {total} registros.</p>')
-    nomes = {"failure": "Fracasso", "other": "Outro", "success": "Sucesso", "unknown": "Desconhecido"}
-    tabela = resumo.rename(index=nomes, columns={"Taxa de adesão (%)": "Taxa de adesão"}).copy()
-    tabela.index.name = "Resultado anterior"
-    for campo in ["Registros", "Adesões"]:
-        tabela[campo] = tabela[campo].map(lambda v: f"{v:,}".replace(",", "."))
-    tabela["Taxa de adesão"] = tabela["Taxa de adesão"].map(lambda v: f"{v:.2f}%".replace(".", ","))
-    html = tabela.reset_index().to_html(index=False, border=0)
-    st.html(f'<div class="resultados">{html}</div>')
-    st.caption("Taxa de adesão = adesões ÷ registros do mesmo resultado anterior. "
-               "O recorte considera pdays diferente de −1.")
+    st.html('<section class="capa"><div class="gravura" aria-hidden="true"></div>'
+            '<div class="texto-capa"><h1>Histórico de campanhas</h1>'
+            '<p>Adesão a depósitos a prazo entre clientes com contato anterior.</p></div></section>')
+    metricas = st.empty()
+    principal, controles = st.columns([2.15, 1], gap="large")
+    with controles:
+        with st.container(border=True):
+            st.subheader("Filtrar comparação")
+            canais = {"Todos": None, "Celular": "cellular", "Telefone fixo": "telephone", "Desconhecido": "unknown"}
+            canal = st.selectbox("Canal da campanha atual", list(canais), key="canal")
+            opcoes = {"Todos": None, "Sim": "yes", "Não": "no"}
+            emprestimo = st.selectbox("Empréstimo pessoal", list(opcoes), key="emprestimo")
+
+            def limpar():
+                st.session_state.canal = "Todos"
+                st.session_state.emprestimo = "Todos"
+
+            st.button("Limpar filtros", on_click=limpar, disabled=canal == emprestimo == "Todos")
+    base = dados.loc[dados["pdays"].ne(-1)]
+    if canais[canal]:
+        base = base.loc[base["contact"].eq(canais[canal])]
+    if opcoes[emprestimo]:
+        base = base.loc[base["loan"].eq(opcoes[emprestimo])]
+    resumo = resumir_adesao(base)
+    n, adesoes = len(base), int(resumo["Adesões"].sum())
+    medidas = [("Registros no recorte", inteiro(n)), ("Adesões", inteiro(adesoes)),
+               ("Taxa de adesão", percentual(100 * adesoes / n) if n else "—")]
+    metricas.html('<dl class="faixa">' + ''.join(
+        f'<div><dt>{nome}</dt><dd>{valor}</dd></div>' for nome, valor in medidas) + '</dl>')
+    with principal:
+        st.subheader("Adesão por resultado anterior")
+        st.caption("Resposta na campanha atual, agrupada pelo desfecho do contato anterior.")
+        if n:
+            nomes = {"failure": "Fracasso", "other": "Outro", "success": "Sucesso", "unknown": "Desconhecido"}
+            linhas = "".join(
+                f'<tr><th scope="row">{nomes[c]}</th><td>{inteiro(r)}</td><td>{inteiro(a)}</td>'
+                f'<td>{percentual(t)}</td></tr>' for c, r, a, t in resumo.itertuples())
+            st.html('<div class="resultados"><table aria-label="Adesão por resultado anterior">'
+                    '<thead><tr><th>Resultado anterior</th><th>Registros</th><th>Adesões</th><th>Taxa</th>'
+                    '</tr></thead><tbody>' + linhas + '</tbody></table></div>')
+            st.download_button("Exportar esta tabela", resumo.rename_axis("poutcome").to_csv(
+                sep=";", decimal=","), file_name="adesao-por-resultado.csv", mime="text/csv", icon=":material/download:")
+        else:
+            st.info("Este recorte não tem registros. Altere um filtro ou use Limpar filtros.")
+    with st.expander("Pergunta de pesquisa e método"):
+        st.write(PERGUNTA)
+        st.write(f"Base completa: {inteiro(len(dados))} registros. O recorte inclui pdays diferente de −1. "
+                 "A taxa divide as adesões pelos registros da mesma categoria após os filtros. "
+                 "O resultado anterior desconhecido permanece identificado.")
 elif pagina == "Exploração":
-    st.subheader("Exploração da base")
+    st.html('<section class="pagina"><h1>Exploração da base</h1><p>Consulte as 17 variáveis ou cruze duas delas para investigar uma relação.</p></section>')
     st.caption("Nas estatísticas numéricas, pdays = −1 é excluído apenas dos cálculos de dias. "
                "O CSV original é preservado. Os limites de outliers usam 1,5 × IQR.")
     opcoes = {
@@ -83,13 +153,15 @@ elif pagina == "Exploração":
     }
     escolha = st.selectbox("Tabela", [*opcoes, "Relação entre duas variáveis", "Dados originais"])
     if escolha == "Dados originais":
-        campos = st.multiselect("Colunas", dados.columns, default=list(dados.columns))
+        campos = st.multiselect("Colunas", dados.columns, default=list(dados.columns), format_func=nome_campo)
         if campos:
             st.dataframe(dados[campos], hide_index=True)
+        else:
+            st.info("Selecione uma coluna para consultar os registros.")
     elif escolha == "Relação entre duas variáveis":
         campos = list(dados.columns)
-        x = st.selectbox("Agrupar por", campos)
-        y = st.selectbox("Examinar", [c for c in campos if c != x])
+        x = st.selectbox("Agrupar por", campos, format_func=nome_campo)
+        y = st.selectbox("Examinar", [c for c in campos if c != x], format_func=nome_campo)
         consulta = dados.copy()
         consulta["pdays"] = consulta["pdays"].mask(consulta["pdays"].eq(-1))
         if y in dados.select_dtypes("number"):
@@ -99,39 +171,50 @@ elif pagina == "Exploração":
     else:
         st.dataframe(resultados[opcoes[escolha]])
 else:
-    st.subheader("Visualizações do grupo")
+    st.html('<section class="pagina"><h1>Visualizações do grupo</h1><p>Explore as figuras ou edite os recortes e as notas da equipe.</p></section>')
     arquivo = PASTA / "visualizacoes.json"
     if "rascunho" not in st.session_state:
         st.session_state.rascunho = json.loads(arquivo.read_text()) if arquivo.exists() else [{} for _ in range(6)]
     salvos = st.session_state.rascunho
     editar = st.toggle("Editar visualizações", value=not arquivo.exists())
-    paineis = []
+    paineis = list(salvos)
+    nomes_figuras = [f"Exploratória {i + 1}" if i < 4 else f"Explanatória {i - 3}" for i in range(6)]
+    escolhida = st.selectbox("Figura em edição", nomes_figuras) if editar else None
     for i, salvo in enumerate(salvos):
         nome = f"Exploratória {i + 1}" if i < 4 else f"Explanatória {i - 3}"
-        with st.expander(nome, expanded=not editar):
-            if editar:
+        if editar and nome != escolhida:
+            continue
+        if editar:
+            editor, previa = st.columns([1, 1.2], gap="large")
+            with editor:
                 def selecionar(rotulo, opcoes, campo):
                     anterior = salvo.get(campo)
                     indice = opcoes.index(anterior) if anterior in opcoes else None
-                    return st.selectbox(rotulo, opcoes, index=indice, key=f"{i}_{campo}")
+                    return st.selectbox(rotulo, opcoes, index=indice, key=f"{i}_{campo}",
+                                        format_func=nome_campo if campo == "variavel" else str)
 
                 painel = {
                     "titulo": st.text_input("Título", salvo.get("titulo", ""), key=f"titulo{i}"),
-                    "tipo": selecionar("Tipo", ["Barras", "Linha"], "tipo"),
-                    "variavel": selecionar("Variável do eixo horizontal",
+                    "tipo": selecionar("Tipo de gráfico", ["Barras", "Linha"], "tipo"),
+                    "variavel": selecionar("Eixo horizontal",
                         list(dados.select_dtypes(exclude="number").columns) + ["day", "campaign", "previous", "age"], "variavel"),
                     "medida": selecionar("Medida", ["Registros", "Adesões", "Taxa de adesão (%)"], "medida"),
                     "historico": st.checkbox("Apenas registros com contato anterior", salvo.get("historico", False), key=f"historico{i}"),
-                    "nota": st.text_area("Nota autoral · o que mostra, interpretação e motivo da escolha",
-                        salvo.get("nota", ""), key=f"nota{i}"),
+                    "nota": st.text_area("Nota autoral", salvo.get("nota", ""), key=f"nota{i}",
+                        help="Descreva o que a figura mostra, a interpretação do grupo e por que escolheram esse gráfico."),
                 }
-            else:
-                painel = salvo
-            paineis.append(painel)
-            if not editar and not painel.get("titulo"):
-                st.caption("Abra a edição para configurar esta visualização.")
+        else:
+            previa = st.container()
+            painel = salvo
+        paineis[i] = painel
+        with previa:
             if all(painel.get(c) for c in ["titulo", "tipo", "variavel", "medida"]):
                 desenhar(painel, dados)
+            elif editar:
+                st.html('<div class="previsual"><strong>Prévia da figura</strong>'
+                        '<p>Preencha o título, o tipo de gráfico, o eixo e a medida para conferir o resultado.</p></div>')
+            else:
+                st.caption(f"{nome} · Aguardando configuração do grupo.")
     if editar:
         st.session_state.rascunho = paineis
         completos = sum(all(p.get(c) for c in ["titulo", "tipo", "variavel", "medida", "nota"]) for p in paineis)
@@ -140,4 +223,6 @@ else:
         st.download_button("Baixar configuração", json.dumps(paineis, ensure_ascii=False, indent=2),
                            file_name="visualizacoes.json", mime="application/json")
 
-st.markdown("[Dados e dicionário · UCI Bank Marketing](https://archive.ics.uci.edu/dataset/222/bank+marketing)")
+st.html('<footer class="rodape"><span>Bank Marketing · AVD 2026.2</span>'
+        '<a href="https://archive.ics.uci.edu/dataset/222/bank+marketing" target="_blank" rel="noopener">'
+        'Dados e dicionário na UCI ↗</a></footer>')

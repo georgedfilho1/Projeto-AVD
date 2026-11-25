@@ -17,14 +17,18 @@ def carregar_dados():
     return dados
 
 
-def tabelas(dados):
-    historico = dados.loc[dados["pdays"].ne(-1)]
+def resumir_adesao(historico):
     adesao = (
         historico.assign(aderiu=historico["y"].eq("yes"))
         .groupby("poutcome")["aderiu"].agg(Registros="size", Adesões="sum")
     )
     adesao["Taxa de adesão (%)"] = 100 * adesao["Adesões"] / adesao["Registros"]
     adesao.index.name = "Resultado anterior"
+    return adesao
+
+
+def tabelas(dados):
+    adesao = resumir_adesao(dados.loc[dados["pdays"].ne(-1)])
     numericas = dados.select_dtypes("number").copy()
     numericas["pdays"] = numericas["pdays"].mask(numericas["pdays"].eq(-1))
     q1, q3 = numericas.quantile(.25), numericas.quantile(.75)
