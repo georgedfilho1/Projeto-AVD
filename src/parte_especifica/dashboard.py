@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import pandas as pd
 import streamlit as st
 
 from eda import carregar_dados, resumir_adesao, tabelas
@@ -36,7 +37,10 @@ def nome_campo(campo):
 @st.cache_data
 def carregar():
     base = carregar_dados()
-    return base, tabelas(base)
+    resultados = tabelas(base)
+    meses = "jan feb mar apr may jun jul aug sep oct nov dec".split()
+    base["month"] = pd.Categorical(base["month"], categories=meses, ordered=True)
+    return base, resultados
 
 
 def inteiro(valor):
@@ -57,7 +61,7 @@ def estilo(css, fonte, gravura):
 def desenhar(painel, dados):
     base = dados.loc[dados["pdays"].ne(-1)] if painel["historico"] else dados
     x, medida = painel["variavel"], painel["medida"]
-    contagens = base.groupby(x)["y"].agg(
+    contagens = base.groupby(x, observed=True)["y"].agg(
         registros="size", adesoes=lambda valores: valores.eq("yes").sum()
     )
     contagens["taxa"] = 100 * contagens["adesoes"] / contagens["registros"]
@@ -165,9 +169,9 @@ elif pagina == "Exploração":
         consulta = dados.copy()
         consulta["pdays"] = consulta["pdays"].mask(consulta["pdays"].eq(-1))
         if y in dados.select_dtypes("number"):
-            st.dataframe(consulta.groupby(x)[y].describe())
+            st.dataframe(consulta.groupby(x, observed=True)[y].describe())
         else:
-            st.dataframe(consulta.groupby([x, y]).size().unstack(fill_value=0))
+            st.dataframe(consulta.groupby([x, y], observed=True).size().unstack(fill_value=0))
     else:
         st.dataframe(resultados[opcoes[escolha]])
 else:
