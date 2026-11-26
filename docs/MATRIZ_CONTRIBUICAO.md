@@ -1,7 +1,20 @@
 # Matriz de contribuição
-| Integrante | Contribuição registrada | Commit ou evidência |
-|---|---|---|
-| georgedfilho1 (completar nome) | Publicação dos CSVs, notebook e figuras Wine Quality | 87ad044 |
-| João Cláudio Beltrão (conferir nome para entrega) | Responsável pela Parte Específica Bank Marketing, com apoio do Codex descrito na declaração | ffc4e91, c080d8b, 72e28a1, cef170b |
-| A preencher pelo integrante 2 | Registrar a integração que efetivamente realizou e verificou | A preencher após o commit |
-| A preencher pelo integrante 3 | Registrar a revisão e documentação que efetivamente realizou | A preencher após o commit |
+
+Registro feito a partir do histórico do repositório (`git log`). Cada integrante confere a própria linha antes da entrega e acrescenta o que fez fora dos commits (por exemplo, as notas analíticas e os textos autorais do relatório).
+
+| Integrante | Autor nos commits | Contribuição registrada | Commits |
+|---|---|---|---|
+| George Diógenes Pessoa Filho | georgedfilho1 | Parte Comum: dados Wine Quality, notebook de EDA e K-Means, figuras originais | 87ad044 |
+| João Cláudio Cavalcanti Beltrão Filho | João Cláudio Beltrão (jocla3) | Parte Específica: base Bank Marketing, script de exploração, dashboard Streamlit; acurácia por nota no notebook; publicação da declaração de IA; revisão de conformidade com apoio do Claude (ver declaração) | ffc4e91, c080d8b, 72e28a1, cef170b, a144fed, b438d8f; merges #1, #3, #4 |
+| Lucas Souto Maior Caldas | Souto96 | Minuta do relatório e primeira versão desta matriz | 45358b2 |
+| Rafael de Lima Cavalcanti Loyo Fernandes | Rafael de Lima Cavalcanti Loyo Fernandes | Integração da estrutura de pastas da Parte Comum, README e requirements; revisão e merge do PR #2 | c7fb789; merge #2 |
+
+Os commits de autoria "Claude" foram feitos com IA a pedido de João Cláudio e estão descritos na declaração de uso de IA.
+
+## Conteúdo autoral ainda a registrar
+
+| Item | Responsável |
+|---|---|
+| Configuração das seis visualizações e notas analíticas | [A PREENCHER PELO GRUPO] |
+| Textos da Parte Específica no relatório (ausências, extremos, storytelling, resposta à pergunta) | [A PREENCHER PELO GRUPO] |
+| Conferência final do relatório e postagem no Classroom | [A PREENCHER PELO GRUPO] |

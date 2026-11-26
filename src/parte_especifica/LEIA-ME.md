@@ -1,17 +1,32 @@
 # Parte Específica · Bank Marketing
 
-Painel para gestores de campanhas. Segundo confirmação da equipe, a professora aprovou o dataset Bank Marketing submetido no checkpoint. A pergunta de pesquisa está na tela inicial. Usamos o arquivo original bank-full.csv, com delimitador ponto e vírgula, e o dicionário original bank-names.txt em data/parte_especifica/. Fonte: Moro, S., Rita, P. e Cortez, P. (2014), Bank Marketing, UCI Machine Learning Repository, https://doi.org/10.24432/C5K306 (CC BY 4.0).
+Painel para gestores de campanhas bancárias. A professora aprovou o dataset Bank Marketing no checkpoint. A pergunta de pesquisa aparece na tela inicial do dashboard e em `docs/relatorio_parte_especifica.md`.
 
-Na raiz do repositório, usando um ambiente virtual com Python 3.11 ou superior:
+**Base.** `data/parte_especifica/bank-full.csv` (delimitador ponto e vírgula, 45.211 registros, 17 colunas) e o dicionário original `bank-names.txt`. Fonte: Moro, S., Rita, P. e Cortez, P. (2014), Bank Marketing, UCI Machine Learning Repository, https://doi.org/10.24432/C5K306 (CC BY 4.0).
 
-```sh
-python -m pip install pandas matplotlib streamlit
-python src/parte_especifica/eda.py
-python -m streamlit run src/parte_especifica/dashboard.py
-```
+## Arquivos
 
-O primeiro script reproduz as seis tabelas em out/parte_especifica/. A taxa usa a contagem de y igual a yes dividida pelo total de registros de cada categoria entre registros com pdays diferente de −1. Cada linha conta como um registro. Os valores unknown continuam identificados no quadro de estrutura. Nos resumos numéricos de pdays, o código desconsidera o marcador de ausência de contato anterior. As contagens fora dos limites de IQR são diagnósticos. No recorte com contato anterior, mantemos os cinco registros com poutcome igual a unknown em uma categoria própria, com contagem visível. Os registros com pdays igual a −1 permanecem na base completa. A equipe aprovou preservar as observações sinalizadas pelo IQR durante a inspeção e avaliar domínio e impacto antes de decidir qualquer exclusão.
+| Arquivo | Função |
+|---|---|
+| `eda.py` | Gera as tabelas de estrutura, frequências, distribuições, correlações e limites de IQR em `out/parte_especifica/`. |
+| `graficos.py` | Desenha as visualizações a partir da configuração escolhida pelo grupo. |
+| `dashboard.py` | App Streamlit: visão geral, exploração, visualizações do grupo e página da Parte Comum. |
+| `visualizacoes.json` | Configuração e notas das seis visualizações, gravada pelo próprio dashboard. |
 
-Em **Visualizações**, a equipe escolhe o recorte, o tipo, os eixos e o título, confere as contagens e registra uma nota em cada um dos seis espaços. Pelo menos uma das duas explanatórias deve responder à pergunta aprovada. Baixe a configuração antes de fechar a sessão, salve-a como src/parte_especifica/visualizacoes.json e reabra o app para conferir o modo de apresentação. O colega responsável pelo relatório deve receber também o raciocínio do grupo sobre público, ausências, outliers, história e destaques visuais.
+## Convenções de cálculo
 
-Apoio de IA para registrar na declaração: Codex, no uso de pandas, na interface Streamlit, no suporte técnico à renderização com Matplotlib e nos testes de execução. A equipe deve complementar o registro com as atividades que efetivamente realizar.
+- A taxa de adesão é o número de registros com `y = yes` dividido pelo total de registros da mesma categoria.
+- O recorte "com contato anterior" usa `pdays ≠ −1`. `pdays = −1` e `previous = 0` ocorrem exatamente nos mesmos 36.954 registros. Nesses registros, os dois campos marcam ausência de contato anterior e ficam fora dos resumos numéricos e do IQR desses campos. O CSV original não é alterado.
+- Os valores `unknown` continuam identificados e contados na tabela de estrutura.
+- Os limites de IQR (1,5 × IQR) são diagnósticos. Nenhum registro é excluído automaticamente.
+- Os gráficos avisam quando uma categoria tem menos de 30 registros.
+
+## Como preencher as seis visualizações
+
+1. Rode `python -m streamlit run src/parte_especifica/dashboard.py` e abra **Visualizações**.
+2. Para cada figura, o grupo escolhe o título, o tipo (barras, barras agrupadas, linha, histograma ou boxplot), as variáveis, o recorte e, se quiser, uma categoria para destacar com cor (atributo pré-atentivo), com a justificativa do destaque.
+3. Escreva a nota autoral nos três campos: o que a figura mostra, o insight e por que este tipo de gráfico. O enunciado proíbe usar IA nessas notas.
+4. Em uma das explanatórias, marque "Esta figura responde diretamente à pergunta de pesquisa".
+5. Clique em **Salvar em visualizacoes.json** e faça o commit do arquivo.
+
+As explanatórias também aparecem na tela inicial e entram automaticamente no relatório.
