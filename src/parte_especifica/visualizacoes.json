@@ -1,0 +1,68 @@
+[
+  {
+    "titulo": "Volume de contatos por mês",
+    "tipo": "Barras",
+    "variavel": "month",
+    "medida": "Registros",
+    "historico": false,
+    "nota_mostra": "Contagem de registros por mês do calendário, reunindo os anos da base.",
+    "nota_insight": "Maio concentra 13.766 dos 45.211 registros. Essa concentração descreve o calendário observado das campanhas.",
+    "nota_por_que": "As barras em ordem cronológica permitem comparar os volumes mensais a partir do zero."
+  },
+  {
+    "titulo": "Canais registrados na campanha atual",
+    "tipo": "Barras",
+    "variavel": "contact",
+    "medida": "Registros",
+    "historico": false,
+    "nota_mostra": "Frequência de cada canal, incluindo o desconhecido.",
+    "nota_insight": "O celular aparece em 29.285 registros. Outros 13.020 têm canal desconhecido, o que limita comparações de cobertura por canal.",
+    "nota_por_que": "As categorias são nominais. O comprimento das barras mostra a participação de cada uma na mesma escala."
+  },
+  {
+    "titulo": "Adesão ao depósito na base completa",
+    "tipo": "Barras",
+    "variavel": "y",
+    "medida": "Registros",
+    "historico": false,
+    "nota_mostra": "Número de registros com e sem adesão ao depósito.",
+    "nota_insight": "Em 45.211 registros houve 5.289 adesões (11,7%). A resposta afirmativa é minoritária.",
+    "nota_por_que": "Duas barras deixam visível a diferença de frequência entre as classes do desfecho."
+  },
+  {
+    "titulo": "Resultado anterior entre registros com histórico",
+    "tipo": "Barras",
+    "variavel": "poutcome",
+    "medida": "Registros",
+    "historico": true,
+    "nota_mostra": "Tamanho de cada grupo com contato anterior registrado.",
+    "nota_insight": "Há 4.901 registros de fracasso, 1.840 de outro resultado, 1.511 de sucesso e cinco de resultado desconhecido.",
+    "nota_por_que": "As barras mostram os denominadores usados na comparação das taxas e tornam visível a diferença de tamanho entre os grupos."
+  },
+  {
+    "titulo": "Sucesso anterior acompanha maior taxa de adesão",
+    "tipo": "Barras",
+    "variavel": "poutcome",
+    "medida": "Taxa de adesão (%)",
+    "historico": true,
+    "nota_mostra": "Percentual de adesão na campanha atual dentro de cada categoria de resultado anterior.",
+    "nota_insight": "A adesão foi de 64,73% após sucesso e 12,61% após fracasso. No grupo de resultado desconhecido, duas adesões em cinco registros produzem 40%.",
+    "nota_por_que": "Barras na mesma escala percentual permitem comparar grupos de tamanhos diferentes. Os denominadores ajudam a avaliar a precisão de cada taxa.",
+    "destaque": "success",
+    "justificativa_destaque": "A cor destaca o mesmo grupo nas duas figuras e permite acompanhar sua taxa e seu volume de adesões.",
+    "responde_pergunta": true
+  },
+  {
+    "titulo": "Sucessos anteriores concentram metade das adesões do recorte",
+    "tipo": "Barras",
+    "variavel": "poutcome",
+    "medida": "Adesões",
+    "historico": true,
+    "nota_mostra": "Quantidade de adesões atuais segundo o desfecho anterior.",
+    "nota_insight": "O grupo de sucesso reúne 978 das 1.905 adesões (51,3%), embora represente apenas 18,3% dos registros com histórico.",
+    "nota_por_que": "A escala de contagem mostra quanto cada grupo contribuiu para o volume de adesões, complementando a comparação percentual.",
+    "destaque": "success",
+    "justificativa_destaque": "A cor destaca o mesmo grupo nas duas figuras e permite acompanhar sua taxa e seu volume de adesões.",
+    "responde_pergunta": false
+  }
+]
